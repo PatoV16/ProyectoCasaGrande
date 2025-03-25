@@ -1,0 +1,2 @@
+C:/Users/Usuario/Documents/GitHub/BigHouse/movil/casa_grande_app/android/app/.cxx/Debug/1g1v604r/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/Usuario/Documents/GitHub/BigHouse/movil/casa_grande_app/android/app/.cxx/Debug/1g1v604r/armeabi-v7a/CMakeFiles/rebuild_cache.dir
