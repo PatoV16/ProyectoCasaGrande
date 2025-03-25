@@ -167,21 +167,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.9),
+                      color: const Color.fromARGB(255, 248, 248, 248).withOpacity(0.9),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: primaryColor.withOpacity(0.3),
+                          color: const Color.fromARGB(255, 247, 247, 247).withOpacity(0.3),
                           blurRadius: 15,
                           offset: const Offset(0, 5),
                         ),
                       ],
                     ),
-                    child: const Icon(
-                      CupertinoIcons.heart_fill,
-                      size: 50,
-                      color: CupertinoColors.white,
-                    ),
+                    child: Image.asset(
+                      'assets/logo.png',  // Asegúrate de que la imagen esté en la carpeta assets y declarada en pubspec.yaml
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,  // Ajusta la imagen dentro del espacio asignado
+),
                   ),
                 ),
                 
