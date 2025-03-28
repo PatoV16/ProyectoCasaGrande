@@ -135,23 +135,26 @@ Future<UserModel?> getUserById(String uid) async {
   }
 }
 
-Future<String?> obtenerUidUsuarioActual() async {
+
+Future<String?> getUserCargo() async {
   try {
-    // Obtener el usuario actual
-    User? user = FirebaseAuth.instance.currentUser;
-    
-    // Si hay un usuario autenticado, devolver su UID
-    if (user != null) {
-      return user.uid;
-    } else {
-      // Si no hay un usuario autenticado
-      print("No hay un usuario autenticado.");
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("No hay usuario autenticado");
       return null;
     }
+    final doc = await usersRef.doc(user.uid).get();
+    if (!doc.exists) {
+      print("No se encontró el usuario en Firestore");
+      return null;
+    }
+    final data = doc.data() as Map<String, dynamic>?;
+    return data?['cargo'] as String?;
   } catch (e) {
-    print("Error al obtener UID: $e");
+    print("Error al obtener el cargo del usuario autenticado: $e");
     return null;
   }
 }
+
 
 }

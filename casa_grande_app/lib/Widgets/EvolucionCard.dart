@@ -149,7 +149,7 @@ class _ListaPacientesScreenState extends State<EvolucionScreen> {
             ),
             trailing: IconButton(
               icon: Icon(Icons.note_add, color: Colors.blue),
-              onPressed: () => _navegarAFormularioEvolucion(paciente.id.toString()),
+              onPressed: () => _navegarAFormularioEvolucion(paciente.cedula),
               tooltip: 'Agregar Evolución',
             ),
             onTap: () {
@@ -197,13 +197,13 @@ class _ListaPacientesScreenState extends State<EvolucionScreen> {
               ),
               SizedBox(height: 8),
               Expanded(
-                child: _buildEvolucionesPaciente(paciente.id.toString()),
+                child: _buildEvolucionesPaciente(paciente.cedula),
               ),
               SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => _navegarAFormularioEvolucion(paciente.id.toString()),
+                  onPressed: () => _navegarAFormularioEvolucion(paciente.cedula),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

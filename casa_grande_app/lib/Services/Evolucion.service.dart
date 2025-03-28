@@ -5,7 +5,6 @@ class EvolucionService {
   final CollectionReference _evolucionesCollection =
       FirebaseFirestore.instance.collection('evoluciones');
 
-  /// 🔹 Crear una nueva evolución
   Future<Evolucion> crearEvolucion({
     required String idPaciente,
     required DateTime fechaHora,
@@ -15,14 +14,15 @@ class EvolucionService {
   }) async {
     try {
       final evolucion = Evolucion(
+        id: '',
         idPaciente: idPaciente,
         fechaHora: fechaHora,
-        observaciones: observaciones,
         areaServicio: areaServicio,
-        tipoFicha: tipoFicha, id: '',
-        actividades: [], 
-        evolucion: '', 
+        actividades: [],
+        evolucion: '',
+        observaciones: observaciones,
         recomendaciones: '',
+        tipoFicha: tipoFicha,
       );
 
       final docRef = await _evolucionesCollection.add(evolucion.toMap());
@@ -33,7 +33,6 @@ class EvolucionService {
     }
   }
 
-  /// 🔹 Obtener una evolución por ID
   Future<Evolucion?> obtenerEvolucionPorId(String id) async {
     try {
       final doc = await _evolucionesCollection.doc(id).get();
@@ -47,22 +46,18 @@ class EvolucionService {
     }
   }
 
-  /// 🔹 Obtener todas las evoluciones
   Future<List<Evolucion>> obtenerTodasLasEvoluciones() async {
     try {
       final snapshot = await _evolucionesCollection.get();
-      List<Evolucion> evoluciones = snapshot.docs
+      return snapshot.docs
           .map((doc) => Evolucion.fromMap(doc.id, doc.data() as Map<String, dynamic>))
           .toList();
-
-      return evoluciones;
     } catch (e) {
       print("❌ Error al obtener evoluciones: $e");
       return [];
     }
   }
 
-  /// 🔹 Actualizar una evolución
   Future<void> actualizarEvolucion(Evolucion evolucion) async {
     try {
       await _evolucionesCollection.doc(evolucion.id).update(evolucion.toMap());
@@ -72,7 +67,6 @@ class EvolucionService {
     }
   }
 
-  /// 🔹 Eliminar una evolución
   Future<void> eliminarEvolucion(String id) async {
     try {
       await _evolucionesCollection.doc(id).delete();

@@ -37,6 +37,7 @@ import 'package:casa_grande_app/Services/AsistenciaUsuario.service.dart';
 import 'package:casa_grande_app/Widgets/EvolucionCard.dart';
 import 'package:casa_grande_app/Widgets/Login_Screen.dart';
 import 'package:casa_grande_app/Widgets/RegistroAsistenciasUser.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -49,6 +50,19 @@ import 'firebase_options.dart'; // Asegúrate de importar el archivo generado
 import 'package:provider/provider.dart';
 import 'package:casa_grande_app/Services/ActaCompromiso.service.dart';
 
+class FirestoreIndexes {
+  static Future<void> createIndexes() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    
+    // Ejemplo de creación de índice para la colección 'evoluciones'
+    await firestore.collection('evoluciones').doc('index').set({
+      'index_fields': [
+        {'field': 'idPaciente', 'type': 'ascending'},
+        {'field': 'fechaHora', 'type': 'descending'}
+      ]
+    });
+  }
+}
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -56,7 +70,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
+  await FirestoreIndexes.createIndexes();
   runApp(const MyApp());
 }
 
