@@ -1,3 +1,4 @@
+import 'package:casa_grande_app/Models/AsistenciaUsuario.model.dart';
 import 'package:casa_grande_app/Models/Barthel.model.dart';
 import 'package:casa_grande_app/Models/Empleado.model.dart';
 import 'package:casa_grande_app/Models/Paciente.model.dart';
@@ -32,8 +33,11 @@ import 'package:casa_grande_app/Pages/trabajadorSocial/form/fichaSocialform.dart
 import 'package:casa_grande_app/Pages/trabajadorSocial/screen/dashboardTrabajadorSocial.dart';
 import 'package:casa_grande_app/Pages/trabajadorSocial/screen/fichaSocialList.dart';
 import 'package:casa_grande_app/Pages/trabajadorSocial/screen/fichaSocialScreen.dart';
+import 'package:casa_grande_app/Services/AsistenciaUsuario.service.dart';
 import 'package:casa_grande_app/Widgets/EvolucionCard.dart';
 import 'package:casa_grande_app/Widgets/Login_Screen.dart';
+import 'package:casa_grande_app/Widgets/RegistroAsistenciasUser.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -314,8 +318,26 @@ class MyApp extends StatelessWidget {
             
             return FichaSocialForm(idPaciente: idPaciente);
           },
-
+          //RegistrarAsistenciaUsuarioScreen
+          '/RegistrarAsistenciaUsuario': (context) {
+      final args = ModalRoute.of(context)!.settings.arguments as UserModel;
+      return FutureBuilder<String?>(
+        future: AsistenciaUsuarioService().obtenerUidUsuarioActual(), // Esperamos el UID
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator()); // Muestra un indicador de carga mientras se obtiene el UID
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error al obtener el UID'));
+          } else if (snapshot.hasData) {
+            final uid = snapshot.data;
+            return RegistrarAsistenciaUsuarioScreen(uid: uid ?? ""); // Pasa el UID a la pantalla
+          } else {
+            return Center(child: Text('No se pudo obtener el UID'));
+          }
         },
+      );
+        },
+        }
       ),
     );
   }

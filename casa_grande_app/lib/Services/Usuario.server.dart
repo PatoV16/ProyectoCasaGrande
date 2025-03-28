@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../Models/UserModel.dart';
 
@@ -130,6 +131,25 @@ Future<UserModel?> getUserById(String uid) async {
     return UserModel.fromJson(data);
   } catch (e) {
     print('Error al obtener usuario por UID: $e');
+    return null;
+  }
+}
+
+Future<String?> obtenerUidUsuarioActual() async {
+  try {
+    // Obtener el usuario actual
+    User? user = FirebaseAuth.instance.currentUser;
+    
+    // Si hay un usuario autenticado, devolver su UID
+    if (user != null) {
+      return user.uid;
+    } else {
+      // Si no hay un usuario autenticado
+      print("No hay un usuario autenticado.");
+      return null;
+    }
+  } catch (e) {
+    print("Error al obtener UID: $e");
     return null;
   }
 }

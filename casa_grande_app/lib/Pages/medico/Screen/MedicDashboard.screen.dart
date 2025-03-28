@@ -84,7 +84,7 @@ class MedicDashboard extends StatelessWidget {
                     ActionButton(
                       label: 'Registrar\nAsistencia',
                       icon: CupertinoIcons.checkmark_circle,
-                      onPressed: () => Navigator.pushNamed(context, '/registrarAsistencia'),
+                      onPressed: () => Navigator.pushNamed(context, '/RegistrarAsistenciaUsuario'),
                     ),
                     
                     ActionButton(
