@@ -3,6 +3,10 @@ import 'package:casa_grande_app/Models/Barthel.model.dart';
 import 'package:casa_grande_app/Models/Paciente.model.dart';
 import 'package:casa_grande_app/Services/Barthel.service.dart';
 import 'package:casa_grande_app/Services/Paciente.service.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'dart:typed_data';
 
 class BarthelDetalleScreen extends StatefulWidget {
   final String idPaciente;
@@ -54,6 +58,216 @@ class _BarthelDetalleScreenState extends State<BarthelDetalleScreen> {
     }
   }
 
+  // Función para generar e imprimir el informe PDF
+  Future<void> _imprimirInforme(Paciente paciente, Barthel barthel) async {
+    final pdf = pw.Document();
+    
+    // Función auxiliar para determinar color según puntaje
+    PdfColor _getColorForScore(int puntaje) {
+      if (puntaje < 21) return PdfColors.red;
+      if (puntaje < 61) return PdfColors.orange;
+      if (puntaje < 91) return PdfColors.amber;
+      if (puntaje < 100) return PdfColors.lightGreen;
+      return PdfColors.green;
+    }
+    
+    // Obtener interpretación según puntaje
+    String _getInterpretacion(int puntaje) {
+      if (puntaje < 21) return 'Dependencia total';
+      if (puntaje < 61) return 'Dependencia severa';
+      if (puntaje < 91) return 'Dependencia moderada';
+      if (puntaje < 100) return 'Dependencia leve';
+      return 'Independencia';
+    }
+    
+    // Crear lista de actividades
+    final actividades = [
+      {'actividad': 'Comer', 'puntaje': barthel.comer},
+      {'actividad': 'Traslado', 'puntaje': barthel.traslado},
+      {'actividad': 'Aseo Personal', 'puntaje': barthel.aseoPersonal},
+      {'actividad': 'Uso de Retrete', 'puntaje': barthel.usoRetrete},
+      {'actividad': 'Bañarse', 'puntaje': barthel.banarse},
+      {'actividad': 'Desplazarse', 'puntaje': barthel.desplazarse},
+      {'actividad': 'Subir Escaleras', 'puntaje': barthel.subirEscaleras},
+      {'actividad': 'Vestirse', 'puntaje': barthel.vestirse},
+      {'actividad': 'Control de Heces', 'puntaje': barthel.controlHeces},
+      {'actividad': 'Control de Orina', 'puntaje': barthel.controlOrina},
+    ].where((item) => item['puntaje'] != null).toList();
+    
+    // Crear el documento PDF
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: pw.EdgeInsets.all(32),
+        header: (context) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text('Escala de Barthel', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                pw.Text('Fecha: ${_formatDate(DateTime.now())}', style: pw.TextStyle(fontSize: 12)),
+              ],
+            ),
+            pw.Divider(thickness: 1),
+          ],
+        ),
+        build: (context) => [
+          // Sección de información del paciente
+          pw.Container(
+            margin: pw.EdgeInsets.only(bottom: 16),
+            padding: pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.teal),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Información del Paciente', 
+                  style: pw.TextStyle(
+                    fontSize: 16, 
+                    fontWeight: pw.FontWeight.bold, 
+                    color: PdfColors.teal
+                  )
+                ),
+                pw.SizedBox(height: 8),
+                _buildPdfInfoRow('Nombre:', '${paciente.nombre} ${paciente.apellido}'),
+                _buildPdfInfoRow('C.I.:', paciente.cedula),
+                _buildPdfInfoRow('Fecha de Evaluación:', _formatDate(barthel.fechaEvaluacion ?? DateTime.now())),
+              ],
+            ),
+          ),
+          
+          // Sección de resultados
+          pw.Container(
+            margin: pw.EdgeInsets.only(bottom: 16),
+            padding: pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.teal),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Resultados de la Escala de Barthel', 
+                  style: pw.TextStyle(
+                    fontSize: 16, 
+                    fontWeight: pw.FontWeight.bold, 
+                    color: PdfColors.teal
+                  )
+                ),
+                pw.SizedBox(height: 8),
+                ...actividades.map((item) => _buildPdfInfoRow(
+                  item['actividad'].toString(), 
+                  '${item['puntaje']} puntos'
+                )).toList(),
+                pw.SizedBox(height: 16),
+                
+                // Resultados totales
+                pw.Container(
+                  padding: pw.EdgeInsets.all(12),
+                  decoration: pw.BoxDecoration(
+                    color: _getColorForScore(barthel.puntajeTotal ?? 0).shade(0.1),
+                    borderRadius: pw.BorderRadius.circular(8),
+                    border: pw.Border.all(color: _getColorForScore(barthel.puntajeTotal ?? 0)),
+                  ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'Puntaje Total: ${barthel.puntajeTotal ?? 0}',
+                        style: pw.TextStyle(
+                          fontSize: 16,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 8),
+                      pw.Text(
+                        'Interpretación: ${_getInterpretacion(barthel.puntajeTotal ?? 0)}',
+                        style: pw.TextStyle(
+                          fontSize: 14,
+                          color: _getColorForScore(barthel.puntajeTotal ?? 0),
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Sección de observaciones
+          pw.Container(
+            padding: pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.teal),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Observaciones', 
+                  style: pw.TextStyle(
+                    fontSize: 16, 
+                    fontWeight: pw.FontWeight.bold, 
+                    color: PdfColors.teal
+                  )
+                ),
+                pw.SizedBox(height: 8),
+                _buildPdfInfoRow('Comentario:', barthel.observaciones ?? 'No especificado'),
+              ],
+            ),
+          ),
+        ],
+        footer: (context) => pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.center,
+          children: [
+            pw.Text('Casa Grande - Evaluación de Barthel'),
+            pw.Text(' | '),
+            pw.Text('Página ${context.pageNumber} de ${context.pagesCount}'),
+          ],
+        ),
+      ),
+    );
+    
+    // Mostrar vista previa e imprimir
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+      name: 'Escala_de_Barthel_${paciente.cedula}',
+    );
+  }
+  
+  // Función auxiliar para filas de información en PDF
+  pw.Widget _buildPdfInfoRow(String label, String value) {
+    return pw.Padding(
+      padding: pw.EdgeInsets.only(bottom: 8.0),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            label,
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Container(
+            padding: pw.EdgeInsets.all(6),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.grey50,
+              borderRadius: pw.BorderRadius.circular(4),
+              border: pw.Border.all(color: PdfColors.grey300),
+            ),
+            width: double.infinity,
+            child: pw.Text(
+              value.isEmpty ? 'No especificado' : value,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,6 +275,31 @@ class _BarthelDetalleScreenState extends State<BarthelDetalleScreen> {
         title: const Text('Escala de Barthel'),
         backgroundColor: Colors.teal[700],
         elevation: 0,
+        actions: [
+          // Agregar el botón de impresión en el AppBar
+          IconButton(
+            icon: Icon(Icons.print),
+            onPressed: () async {
+              try {
+                // Obtener los datos más recientes
+                final pacienteData = await paciente;
+                final barthelData = await barthel;
+                
+                if (pacienteData != null && barthelData != null) {
+                  await _imprimirInforme(pacienteData, barthelData);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('No hay datos disponibles para imprimir')),
+                  );
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error al generar el informe: $e')),
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: _checkingData
           ? Center(child: CircularProgressIndicator(color: Colors.teal[700]))
@@ -133,6 +372,22 @@ class _BarthelDetalleScreenState extends State<BarthelDetalleScreen> {
                         ],
                       ),
                       const SizedBox(height: 30),
+                      // Agregar botón de impresión al final del documento
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.print),
+                          label: Text('Imprimir Informe'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal[700],
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            minimumSize: Size(double.infinity, 48),
+                          ),
+                          onPressed: () async {
+                            await _imprimirInforme(paciente, barthel);
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 );

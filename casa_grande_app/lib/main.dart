@@ -46,23 +46,11 @@ import 'Pages/admin/screen/actasCompromisoScreen.dart';
 import 'Pages/medico/Screen/MedicDashboard.screen.dart';
 import 'Pages/psicologo/form/minimentalform.dart';
 import 'Pages/psicologo/screen/minimentalScreen.dart';
-import 'firebase_options.dart'; // Asegúrate de importar el archivo generado
+import 'firebase_options.dart'; 
 import 'package:provider/provider.dart';
 import 'package:casa_grande_app/Services/ActaCompromiso.service.dart';
 
-class FirestoreIndexes {
-  static Future<void> createIndexes() async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    
-    // Ejemplo de creación de índice para la colección 'evoluciones'
-    await firestore.collection('evoluciones').doc('index').set({
-      'index_fields': [
-        {'field': 'idPaciente', 'type': 'ascending'},
-        {'field': 'fechaHora', 'type': 'descending'}
-      ]
-    });
-  }
-}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -70,7 +58,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await FirestoreIndexes.createIndexes();
   runApp(const MyApp());
 }
 

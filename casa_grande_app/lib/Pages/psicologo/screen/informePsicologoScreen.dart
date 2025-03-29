@@ -1,8 +1,12 @@
+import 'package:casa_grande_app/Models/InformePsicologico.model.dart';
 import 'package:flutter/material.dart';
-import '../../../Models/InformePsicologico.model.dart';
-import '../../../Models/Paciente.model.dart';
-import '../../../Services/EvaluacionPsicologo.service.dart';
-import '../../../Services/Paciente.service.dart';
+import 'package:casa_grande_app/Models/Paciente.model.dart';
+import 'package:casa_grande_app/Services/EvaluacionPsicologo.service.dart';
+import 'package:casa_grande_app/Services/Paciente.service.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'dart:typed_data';
 
 class EvaluacionPsicologicaDetalleScreen extends StatefulWidget {
   final String idPaciente;
@@ -33,7 +37,7 @@ class _EvaluacionPsicologicaDetalleScreenState extends State<EvaluacionPsicologi
       if (resultados[0] == null || resultados[1] == null) {
         if (mounted) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushNamed(context, '/FormInforme', arguments: {'idPaciente': widget.idPaciente});
+            Navigator.pushNamed(context, '/FormEvaluacionPsicologica', arguments: {'idPaciente': widget.idPaciente});
           });
         }
       }
@@ -48,13 +52,309 @@ class _EvaluacionPsicologicaDetalleScreenState extends State<EvaluacionPsicologi
     }
   }
 
+  // Función para generar e imprimir el informe PDF
+  Future<void> _imprimirInforme(Paciente paciente, EvaluacionPsicologica evaluacion) async {
+    final pdf = pw.Document();
+    
+    // Crear el documento PDF
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: pw.EdgeInsets.all(32),
+        header: (context) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text('Informe Psicológico', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                pw.Text('Fecha: ${_formatDate(DateTime.now())}', style: pw.TextStyle(fontSize: 12)),
+              ],
+            ),
+            pw.Divider(thickness: 1),
+          ],
+        ),
+        build: (context) => [
+          // Sección de información del paciente
+          pw.Container(
+            margin: pw.EdgeInsets.only(bottom: 16),
+            padding: pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.deepPurple),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Información del Paciente', 
+                  style: pw.TextStyle(
+                    fontSize: 16, 
+                    fontWeight: pw.FontWeight.bold, 
+                    color: PdfColors.deepPurple
+                  )
+                ),
+                pw.SizedBox(height: 8),
+                _buildPdfInfoRow('Nombre:', '${paciente.nombre} ${paciente.apellido}'),
+                _buildPdfInfoRow('C.I.:', paciente.cedula),
+                _buildPdfInfoRow('Edad:', evaluacion.edad.toString()),
+              ],
+            ),
+          ),
+          
+          // Sección de información de la evaluación
+          pw.Container(
+            margin: pw.EdgeInsets.only(bottom: 16),
+            padding: pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.deepPurple),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Información de la Evaluación', 
+                  style: pw.TextStyle(
+                    fontSize: 16, 
+                    fontWeight: pw.FontWeight.bold, 
+                    color: PdfColors.deepPurple
+                  )
+                ),
+                pw.SizedBox(height: 8),
+                _buildPdfInfoRow('Fecha de Nacimiento:', _formatDate(evaluacion.fechaNacimiento)),
+                _buildPdfInfoRow('Modalidad:', evaluacion.modalidad),
+                _buildPdfInfoRow('Fecha de Ingreso al Servicio:', _formatDate(evaluacion.fechaIngresoServicio)),
+              ],
+            ),
+          ),
+          
+          // Sección de antecedentes
+          pw.Container(
+            margin: pw.EdgeInsets.only(bottom: 16),
+            padding: pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.deepPurple),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Antecedentes', 
+                  style: pw.TextStyle(
+                    fontSize: 16, 
+                    fontWeight: pw.FontWeight.bold, 
+                    color: PdfColors.deepPurple
+                  )
+                ),
+                pw.SizedBox(height: 8),
+                _buildPdfMultiline('Antecedentes Personales:', evaluacion.antecedentesPersonales),
+                _buildPdfMultiline('Antecedentes Familiares:', evaluacion.antecedentesFamiliares),
+                _buildPdfMultiline('Intervenciones Anteriores:', evaluacion.intervencionesAnteriores),
+              ],
+            ),
+          ),
+          
+          // Sección de exploración del estado mental
+          pw.Container(
+            margin: pw.EdgeInsets.only(bottom: 16),
+            padding: pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.deepPurple),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Exploración del Estado Mental', 
+                  style: pw.TextStyle(
+                    fontSize: 16, 
+                    fontWeight: pw.FontWeight.bold, 
+                    color: PdfColors.deepPurple
+                  )
+                ),
+                pw.SizedBox(height: 8),
+                _buildPdfMultiline('', evaluacion.exploracionEstadoMental),
+              ],
+            ),
+          ),
+          
+          // Sección de situación actual
+          pw.Container(
+            margin: pw.EdgeInsets.only(bottom: 16),
+            padding: pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.deepPurple),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Situación Actual', 
+                  style: pw.TextStyle(
+                    fontSize: 16, 
+                    fontWeight: pw.FontWeight.bold, 
+                    color: PdfColors.deepPurple
+                  )
+                ),
+                pw.SizedBox(height: 8),
+                _buildPdfMultiline('', evaluacion.situacionActual),
+              ],
+            ),
+          ),
+          
+          // Sección de resultados de pruebas
+          pw.Container(
+            margin: pw.EdgeInsets.only(bottom: 16),
+            padding: pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.deepPurple),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Resultado de las Pruebas Aplicadas', 
+                  style: pw.TextStyle(
+                    fontSize: 16, 
+                    fontWeight: pw.FontWeight.bold, 
+                    color: PdfColors.deepPurple
+                  )
+                ),
+                pw.SizedBox(height: 8),
+                _buildPdfMultiline('', evaluacion.resultadoPruebas),
+              ],
+            ),
+          ),
+          
+          // Sección de conclusiones y recomendaciones
+          pw.Container(
+            padding: pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.deepPurple),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Conclusiones y Recomendaciones', 
+                  style: pw.TextStyle(
+                    fontSize: 16, 
+                    fontWeight: pw.FontWeight.bold, 
+                    color: PdfColors.deepPurple
+                  )
+                ),
+                pw.SizedBox(height: 8),
+                _buildPdfMultiline('Conclusiones:', evaluacion.conclusiones),
+                _buildPdfMultiline('Recomendaciones:', evaluacion.recomendaciones),
+              ],
+            ),
+          ),
+        ],
+        footer: (context) => pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.center,
+          children: [
+            pw.Text('Casa Grande - Informe Psicológico'),
+            pw.Text(' | '),
+            pw.Text('Página ${context.pageNumber} de ${context.pagesCount}'),
+          ],
+        ),
+      ),
+    );
+    
+    // Mostrar vista previa e imprimir
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+      name: 'Informe_Psicologico_${paciente.cedula}',
+    );
+  }
+  
+  // Función auxiliar para filas de información en PDF
+  pw.Widget _buildPdfInfoRow(String label, String value) {
+    return pw.Padding(
+      padding: pw.EdgeInsets.only(bottom: 8.0),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            label,
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Container(
+            padding: pw.EdgeInsets.all(6),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.grey50,
+              borderRadius: pw.BorderRadius.circular(4),
+              border: pw.Border.all(color: PdfColors.grey300),
+            ),
+            width: double.infinity,
+            child: pw.Text(
+              value.isEmpty ? 'No especificado' : value,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Función para texto multilínea en PDF
+  pw.Widget _buildPdfMultiline(String label, String value) {
+    return pw.Padding(
+      padding: pw.EdgeInsets.only(bottom: 12.0),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          if (label.isNotEmpty) pw.Text(label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+          if (label.isNotEmpty) pw.SizedBox(height: 4),
+          pw.Container(
+            padding: pw.EdgeInsets.all(8),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.grey50,
+              borderRadius: pw.BorderRadius.circular(4),
+              border: pw.Border.all(color: PdfColors.grey300),
+            ),
+            width: double.infinity,
+            child: pw.Text(
+              value.isEmpty ? 'No especificado' : value,
+              textAlign: pw.TextAlign.justify,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detalle de la Evaluación Psicológica'),
+        title: const Text('Evaluación Psicológica'),
         backgroundColor: Colors.deepPurple,
         elevation: 0,
+        actions: [
+          // Botón de impresión en el AppBar
+          IconButton(
+            icon: Icon(Icons.print),
+            onPressed: () async {
+              try {
+                // Obtener los datos más recientes
+                final pacienteData = await paciente;
+                final evaluacionData = await evaluacionPsicologica;
+                
+                if (pacienteData != null && evaluacionData != null) {
+                  await _imprimirInforme(pacienteData, evaluacionData);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('No hay datos disponibles para imprimir')),
+                  );
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error al generar el informe: $e')),
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: _checkingData
           ? Center(child: CircularProgressIndicator(color: Colors.deepPurple))
@@ -66,6 +366,7 @@ class _EvaluacionPsicologicaDetalleScreenState extends State<EvaluacionPsicologi
                 } else if (snapshot.hasError) {
                   return _buildError('Error: ${snapshot.error}');
                 } else if (!snapshot.hasData || snapshot.data![0] == null || snapshot.data![1] == null) {
+                  print("Datos en snapshot: ${snapshot.data}");
                   return _buildNoData();
                 }
 
@@ -89,60 +390,87 @@ class _EvaluacionPsicologicaDetalleScreenState extends State<EvaluacionPsicologi
                         title: 'Información de la Evaluación',
                         icon: Icons.info_outline,
                         children: [
-                          _buildInfoRow('Fecha de Nacimiento:', _formatearFecha(evaluacion.fechaNacimiento)),
+                          _buildInfoRow('Fecha de Nacimiento:', _formatDate(evaluacion.fechaNacimiento)),
                           _buildInfoRow('Modalidad:', evaluacion.modalidad),
-                          _buildInfoRow('Fecha de Ingreso al Servicio:', _formatearFecha(evaluacion.fechaIngresoServicio)),
+                          _buildInfoRow('Fecha de Ingreso al Servicio:', _formatDate(evaluacion.fechaIngresoServicio)),
                         ],
                       ),
                       _buildSection(
                         title: 'Antecedentes',
                         icon: Icons.history,
                         children: [
-                          _buildInfoRow('Antecedentes Personales:', evaluacion.antecedentesPersonales),
-                          _buildInfoRow('Antecedentes Familiares:', evaluacion.antecedentesFamiliares),
-                          _buildInfoRow('Intervenciones Anteriores:', evaluacion.intervencionesAnteriores),
+                          _buildMultiline('Antecedentes Personales:', evaluacion.antecedentesPersonales),
+                          _buildMultiline('Antecedentes Familiares:', evaluacion.antecedentesFamiliares),
+                          _buildMultiline('Intervenciones Anteriores:', evaluacion.intervencionesAnteriores),
                         ],
                       ),
                       _buildSection(
                         title: 'Exploración del Estado Mental',
                         icon: Icons.psychology,
                         children: [
-                          _buildInfoRow('Exploración del Estado Mental:', evaluacion.exploracionEstadoMental),
+                          _buildMultiline('', evaluacion.exploracionEstadoMental),
                         ],
                       ),
                       _buildSection(
                         title: 'Situación Actual',
                         icon: Icons.assessment,
                         children: [
-                          _buildInfoRow('Situación Actual:', evaluacion.situacionActual),
+                          _buildMultiline('', evaluacion.situacionActual),
                         ],
                       ),
                       _buildSection(
                         title: 'Resultado de las Pruebas Aplicadas',
                         icon: Icons.assignment,
                         children: [
-                          _buildInfoRow('Resultado de las Pruebas Aplicadas:', evaluacion.resultadoPruebas),
+                          _buildMultiline('', evaluacion.resultadoPruebas),
                         ],
                       ),
                       _buildSection(
                         title: 'Conclusiones y Recomendaciones',
                         icon: Icons.note,
                         children: [
-                          _buildInfoRow('Conclusiones:', evaluacion.conclusiones),
-                          _buildInfoRow('Recomendaciones:', evaluacion.recomendaciones),
+                          _buildMultiline('Conclusiones:', evaluacion.conclusiones),
+                          _buildMultiline('Recomendaciones:', evaluacion.recomendaciones),
                         ],
                       ),
                       const SizedBox(height: 30),
+                      // Botón de impresión al final del documento
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.print),
+                          label: Text('Imprimir Informe'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            minimumSize: Size(double.infinity, 48),
+                          ),
+                          onPressed: () async {
+                            try {
+                              final pacienteData = await paciente;
+                              final evaluacionData = await evaluacionPsicologica;
+                              
+                              if (pacienteData != null && evaluacionData != null) {
+                                await _imprimirInforme(pacienteData, evaluacionData);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('No hay datos disponibles para imprimir')),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error al generar el informe: $e')),
+                              );
+                            }
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 );
               },
             ),
     );
-  }
-
-  String _formatearFecha(DateTime fecha) {
-    return "${fecha.day}/${fecha.month}/${fecha.year}";
   }
 
   Widget _buildError(String message) {
@@ -180,6 +508,10 @@ class _EvaluacionPsicologicaDetalleScreenState extends State<EvaluacionPsicologi
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 
   Widget _buildSection({required String title, required IconData icon, required List<Widget> children}) {
@@ -242,6 +574,32 @@ class _EvaluacionPsicologicaDetalleScreenState extends State<EvaluacionPsicologi
             ),
             width: double.infinity,
             child: Text(value.isEmpty ? 'No especificado' : value, style: const TextStyle(fontSize: 15)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMultiline(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (label.isNotEmpty) Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey[800])),
+          if (label.isNotEmpty) SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            width: double.infinity,
+            child: Text(
+              value.isEmpty ? 'No especificado' : value,
+              textAlign: TextAlign.justify,
+            ),
           ),
         ],
       ),

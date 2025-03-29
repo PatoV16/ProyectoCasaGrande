@@ -143,11 +143,13 @@ Future<String?> getUserCargo() async {
       print("No hay usuario autenticado");
       return null;
     }
+
     final doc = await usersRef.doc(user.uid).get();
     if (!doc.exists) {
       print("No se encontró el usuario en Firestore");
       return null;
     }
+
     final data = doc.data() as Map<String, dynamic>?;
     return data?['cargo'] as String?;
   } catch (e) {
@@ -155,6 +157,8 @@ Future<String?> getUserCargo() async {
     return null;
   }
 }
+
+
 
 
 }

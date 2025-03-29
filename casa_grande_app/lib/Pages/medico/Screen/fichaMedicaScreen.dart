@@ -4,6 +4,10 @@ import 'package:casa_grande_app/Models/Paciente.model.dart';
 import 'package:casa_grande_app/Services/FichaMedica.service.dart';
 import 'package:casa_grande_app/Services/Paciente.service.dart';
 
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter/material.dart' show Icons;
+import 'package:printing/printing.dart';
 class FichaMedicaDetalleScreen extends StatefulWidget {
   final String idPaciente;
 
@@ -104,8 +108,15 @@ class _FichaMedicaDetalleScreenState extends State<FichaMedicaDetalleScreen> {
                                       'C.I.: ${paciente.cedula}',
                                       style: TextStyle(color: Colors.white, fontSize: 16),
                                     ),
+                                    ElevatedButton(
+  onPressed: () {
+    _imprimirFichaMedica(paciente, fichaMedica);
+  },
+  child: Icon(Icons.print),
+)
                                   ],
                                 ),
+                                
                               ),
                             ],
                           ),
@@ -307,4 +318,259 @@ class _FichaMedicaDetalleScreenState extends State<FichaMedicaDetalleScreen> {
             ),
     );
   }
+  Future<void> _imprimirFichaMedica(Paciente paciente, FichaMedica fichaMedica) async {
+  final doc = pw.Document();
+
+  // Estilos para el PDF
+  final headerStyle = pw.TextStyle(
+    fontSize: 18,
+    fontWeight: pw.FontWeight.bold,
+    color: PdfColor.fromInt(Colors.teal[700]!.value),
+  );
+  
+  final titleStyle = pw.TextStyle(
+    fontSize: 16,
+    fontWeight: pw.FontWeight.bold,
+  );
+  
+  final normalStyle = pw.TextStyle(
+    fontSize: 14,
+  );
+
+  doc.addPage(
+    pw.MultiPage(
+      margin: pw.EdgeInsets.all(20),
+      pageFormat: PdfPageFormat.a4,
+      build: (pw.Context context) {
+        return [
+          // Encabezado
+          pw.Container(
+            width: double.infinity,
+            color: PdfColor.fromInt(Colors.teal[700]!.value),
+            padding: pw.EdgeInsets.all(16),
+            child: pw.Row(
+              children: [
+                pw.Container(
+                  width: 60,
+                  height: 60,
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.white,
+                    shape: pw.BoxShape.circle,
+                  ),
+                  child: pw.Icon(pw.IconData(Icons.person.codePoint)),
+                ),
+                pw.SizedBox(width: 16),
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        '${paciente.nombre} ${paciente.apellido}',
+                        style: pw.TextStyle(
+                          color: PdfColors.white,
+                          fontSize: 22,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        'C.I.: ${paciente.cedula}',
+                        style: pw.TextStyle(
+                          color: PdfColors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          pw.SizedBox(height: 20),
+          
+          // Información personal del paciente
+          _buildPdfSection(
+            title: 'Información Personal',
+            icon: Icons.person,
+            content: [
+              _buildPdfInfoRow('Fecha de Nacimiento:', _formatDate(paciente.fechaNacimiento), titleStyle, normalStyle),
+              _buildPdfInfoRow('Estado Civil:', paciente.estadoCivil, titleStyle, normalStyle),
+              _buildPdfInfoRow('Nivel de Instrucción:', paciente.nivelInstruccion, titleStyle, normalStyle),
+              _buildPdfInfoRow('Profesión/Ocupación:', paciente.profesionOcupacion, titleStyle, normalStyle),
+              _buildPdfInfoRow('Fecha de Ingreso:', _formatDate(paciente.fechaIngreso), titleStyle, normalStyle),
+            ],
+          ),
+          
+          pw.SizedBox(height: 10),
+          
+          // Información de contacto
+          _buildPdfSection(
+            title: 'Información de Contacto',
+            icon: Icons.contact_phone,
+            content: [
+              _buildPdfInfoRow('Teléfono:', paciente.telefono, titleStyle, normalStyle),
+              _buildPdfInfoRow('Dirección:', paciente.direccion, titleStyle, normalStyle),
+            ],
+          ),
+          
+          pw.SizedBox(height: 10),
+          
+          // Estado de salud
+          _buildPdfSection(
+            title: 'Estado de Salud',
+            icon: Icons.medical_services,
+            content: [
+              _buildPdfInfoRow('Condición Física:', fichaMedica.condicionFisica ?? 'No especificado', titleStyle, normalStyle, isMultiline: true),
+              _buildPdfInfoRow('Condición Psicológica:', fichaMedica.condicionPsicologica ?? 'No especificado', titleStyle, normalStyle, isMultiline: true),
+              _buildPdfInfoRow('Estado de Salud General:', fichaMedica.estadoSalud ?? 'No especificado', titleStyle, normalStyle, isMultiline: true),
+            ],
+          ),
+          
+          pw.SizedBox(height: 10),
+          
+          // Medicamentos
+          _buildPdfSection(
+            title: 'Medicamentos',
+            icon: Icons.medication,
+            content: [
+              _buildPdfInfoRow('Medicamentos Actuales:', fichaMedica.medicamentos ?? 'No especificado', titleStyle, normalStyle, isMultiline: true),
+              _buildPdfInfoRow('Intolerancias a Medicamentos:', fichaMedica.intoleranciaMedicamentos ?? 'No especificado', titleStyle, normalStyle, isMultiline: true),
+            ],
+          ),
+          
+          pw.SizedBox(height: 10),
+          
+          // Información familiar
+          _buildPdfSection(
+            title: 'Información Familiar',
+            icon: Icons.family_restroom,
+            content: [
+              _buildPdfInfoRow('Vive Con:', fichaMedica.viveCon ?? 'No especificado', titleStyle, normalStyle),
+              _buildPdfInfoRow('Relaciones Familiares:', fichaMedica.relacionesFamiliares ?? 'No especificado', titleStyle, normalStyle, isMultiline: true),
+            ],
+          ),
+          
+          pw.SizedBox(height: 10),
+          
+          // Información adicional
+          _buildPdfSection(
+            title: 'Información Adicional',
+            icon: Icons.info,
+            content: [
+              _buildPdfInfoRow('Referido Por:', fichaMedica.referidoPor ?? 'No especificado', titleStyle, normalStyle),
+              _buildPdfInfoRow('Observaciones:', fichaMedica.observaciones ?? 'No especificado', titleStyle, normalStyle, isMultiline: true),
+            ],
+          ),
+          
+          pw.SizedBox(height: 20),
+        ];
+      },
+    ),
+  );
+
+  await Printing.layoutPdf(
+    onLayout: (PdfPageFormat format) async => doc.save(),
+  );
+}
+
+
+// Función auxiliar para construir secciones en PDF
+pw.Widget _buildPdfSection({
+  required String title,
+  required IconData icon,
+  required List<pw.Widget> content,
+}) {
+  return pw.Container(
+    margin: pw.EdgeInsets.only(bottom: 10),
+    decoration: pw.BoxDecoration(
+      border: pw.Border.all(color: PdfColor.fromInt(Colors.grey[300]!.value)),
+      borderRadius: pw.BorderRadius.circular(8),
+    ),
+    child: pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Container(
+          padding: pw.EdgeInsets.all(12),
+          decoration: pw.BoxDecoration(
+            color: PdfColor.fromInt(Colors.teal[50]!.value),
+            borderRadius: pw.BorderRadius.only(
+              topLeft: pw.Radius.circular(8),
+              topRight: pw.Radius.circular(8)),
+          ),
+          child: pw.Row(
+            children: [
+              pw.Icon(pw.IconData(icon.codePoint)),
+              pw.SizedBox(width: 8),
+              pw.Text(
+                title,
+                style: pw.TextStyle(
+                  fontSize: 18,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColor.fromInt(Colors.teal[700]!.value),
+                ),
+              ),
+            ],
+          ),
+        ),
+        pw.Padding(
+          padding: pw.EdgeInsets.all(16),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: content,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+pw.Widget _buildPdfInfoRow(
+  String label, 
+  String value, 
+  pw.TextStyle titleStyle, 
+  pw.TextStyle normalStyle, {
+  bool isMultiline = false,
+}) {
+  return pw.Padding(
+    padding: pw.EdgeInsets.only(bottom: 8),
+    child: isMultiline
+        ? pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(label, style: titleStyle),
+              pw.SizedBox(height: 4),
+              pw.Container(
+                padding: pw.EdgeInsets.all(8),
+                decoration: pw.BoxDecoration(
+                  color: PdfColor.fromInt(Colors.grey[50]!.value),
+                  border: pw.Border.all(color: PdfColor.fromInt(Colors.grey[300]!.value)),
+                  borderRadius: pw.BorderRadius.circular(4),
+                ),
+                width: double.infinity,
+                child: pw.Text(
+                  value.isEmpty ? 'No especificado' : value,
+                  style: normalStyle,
+                ),
+              ),
+            ],
+          )
+        : pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Expanded(
+                flex: 2,
+                child: pw.Text(label, style: titleStyle),
+              ),
+              pw.Expanded(
+                flex: 3,
+                child: pw.Text(
+                  value.isEmpty ? 'No especificado' : value,
+                  style: normalStyle,
+                ),
+              ),
+            ],
+          ),
+  );
+}
 }
