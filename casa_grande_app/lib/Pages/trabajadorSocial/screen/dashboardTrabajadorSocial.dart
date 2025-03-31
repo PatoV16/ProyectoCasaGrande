@@ -1,5 +1,6 @@
 import 'package:casa_grande_app/Models/UserModel.dart';
 import 'package:casa_grande_app/Services/Auth.Service.dart';
+import 'package:casa_grande_app/Widgets/avisosUser.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show CircleAvatar, Divider, TextButton;
 import '../../../../Widgets/action_button.dart';
@@ -76,25 +77,22 @@ class TrabajadorSocialDashboard extends StatelessWidget {
                 child: Row(
                   children: [
                     ActionButton(
-                      label: 'Lista de\nPacientes',
-                      icon: CupertinoIcons.person_2,
-                      onPressed: () => Navigator.pushNamed(context, '/PacienteTrabajadorSocialLista'),
+                      label: 'Registrar\nAsistencia',
+                      icon: CupertinoIcons.checkmark_circle,
+                      onPressed: () => Navigator.pushNamed(context,'/RegistrarAsistenciaUsuario', arguments: user),
+
                     ),
                     ActionButton(
-                      label: 'Registrar\nVisita',
-                      icon: CupertinoIcons.checkmark_circle,
-                      onPressed: () => Navigator.pushNamed(context, '/registrarVisita'),
+                      label: 'Evoución\nSocial',
+                      icon: CupertinoIcons.chart_bar,
+                      onPressed: () => Navigator.pushNamed(context, '/Evolucion'),
                     ),
                     ActionButton(
                       label: 'Nueva\nFicha',
                       icon: CupertinoIcons.doc_append,
                       onPressed: () => Navigator.pushNamed(context, '/listaFichaSocial'),
                     ),
-                    ActionButton(
-                      label: 'Historial\nSocial',
-                      icon: CupertinoIcons.chart_bar,
-                      onPressed: () => Navigator.pushNamed(context, '/historialSocial'),
-                    ),
+                   
                     ActionButton(
                       label: 'Cerrar sesión',
                       icon: CupertinoIcons.power,  // Ícono de logout
@@ -116,75 +114,13 @@ class TrabajadorSocialDashboard extends StatelessWidget {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  Expanded(
-                    child: StatsCard(
-                      title: 'Visitas Hoy',
-                      value: '12',
-                      backgroundColor: CupertinoColors.systemBlue.withOpacity(0.1),
-                    ),
+                 Expanded(
+                    child: AvisosListUserWidget(),
                   ),
                   const SizedBox(width: 10),
-                  Expanded(
-                    child: StatsCard(
-                      title: 'Pendientes',
-                      value: '5',
-                      backgroundColor: CupertinoColors.systemOrange.withOpacity(0.1),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: StatsCard(
-                      title: 'Total Pacientes',
-                      value: '87',
-                      backgroundColor: CupertinoColors.systemGreen.withOpacity(0.1),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: StatsCard(
-                      title: 'Fichas Nuevas',
-                      value: '3',
-                      backgroundColor: CupertinoColors.systemPurple.withOpacity(0.1),
-                    ),
-                  ),
                 ],
               ),
               
-              const SizedBox(height: 20),
-              
-              // Próximas visitas
-              const Text(
-                'Próximas Visitas',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey6,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  children: [
-                    _buildAppointmentRow('María González', '10:00', 'Visita Social'),
-                    const Divider(),
-                    _buildAppointmentRow('Juan Pérez', '11:30', 'Seguimiento'),
-                    const Divider(),
-                    _buildAppointmentRow('Ana Torres', '14:15', 'Primera visita'),
-                    TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/todasVisitas'),
-                      child: const Text('Ver todas'),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -192,40 +128,4 @@ class TrabajadorSocialDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildAppointmentRow(String nombre, String hora, String tipo) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          const Icon(
-            CupertinoIcons.person_crop_circle,
-            color: CupertinoColors.systemBlue,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  nombre,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  tipo,
-                  style: const TextStyle(color: CupertinoColors.systemGrey),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            hora,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: CupertinoColors.systemBlue,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

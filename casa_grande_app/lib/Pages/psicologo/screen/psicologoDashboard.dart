@@ -81,10 +81,11 @@ class PsicologoDashboard extends StatelessWidget {
                       icon: CupertinoIcons.person_2,
                       onPressed: () => Navigator.pushNamed(context, '/PacientePsicologoLista'),
                     ),
-                    ActionButton(
+                     ActionButton(
                       label: 'Registrar\nAsistencia',
                       icon: CupertinoIcons.checkmark_circle,
-                      onPressed: () => Navigator.pushNamed(context, '/RegistrarAsistenciaUsuario'),
+                      onPressed: () => Navigator.pushNamed(context,'/RegistrarAsistenciaUsuario', arguments: user),
+
                     ),
                     ActionButton(
                       label: 'Nueva\nFicha',
@@ -134,40 +135,4 @@ class PsicologoDashboard extends StatelessWidget {
     );
   }
   
-  Widget _buildAppointmentRow(String nombre, String hora, String tipo) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          const Icon(
-            CupertinoIcons.person_crop_circle,
-            color: CupertinoColors.systemBlue,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  nombre,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  tipo,
-                  style: const TextStyle(color: CupertinoColors.systemGrey),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            hora,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: CupertinoColors.systemBlue,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

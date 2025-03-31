@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import '../../../Models/FichaSocial.model.dart';
 import '../../../Models/Paciente.model.dart';
 import '../../../Services/FichaSocial.service.dart';
@@ -48,6 +51,202 @@ class _FichaSocialScreenState extends State<FichaSocialScreen> {
     }
   }
 
+  Future<void> _imprimirFichaSocial(Paciente paciente, FichaSocial ficha) async {
+    final pdf = pw.Document();
+    
+    final font = await PdfGoogleFonts.nunitoRegular();
+    final fontBold = await PdfGoogleFonts.nunitoBold();
+    
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        header: (pw.Context context) {
+          return pw.Center(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                pw.Text('FICHA SOCIAL DEL PACIENTE', 
+                  style: pw.TextStyle(font: fontBold, fontSize: 18)),
+                pw.SizedBox(height: 5),
+                pw.Divider(thickness: 1),
+              ],
+            ),
+          );
+        },
+        footer: (pw.Context context) {
+          return pw.Center(
+            child: pw.Text(
+              'Página ${context.pageNumber} de ${context.pagesCount}',
+              style: pw.TextStyle(font: font, fontSize: 10),
+            ),
+          );
+        },
+        build: (pw.Context context) => [
+          _buildPdfSection(
+            title: 'Información del Paciente',
+            items: [
+              {'label': 'Nombre:', 'value': '${paciente.nombre} ${paciente.apellido}'},
+              {'label': 'C.I.:', 'value': paciente.cedula},
+              if (paciente.fechaNacimiento != null)
+                {'label': 'Fecha de Nacimiento:', 'value': _formatearFecha(paciente.fechaNacimiento!)},
+            ],
+            font: font,
+            fontBold: fontBold,
+          ),
+          pw.SizedBox(height: 15),
+          _buildPdfSection(
+            title: 'Red Social de Apoyo',
+            items: [
+              {'label': '¿Ocupa tiempo libre?', 'value': ficha.ocupaTiempoLibre == true ? 'Sí' : 'No'},
+              {'label': 'Actividades de tiempo libre:', 'value': ficha.actividadesTiempoLibre ?? 'No especificado'},
+              {'label': '¿Pertenece a una asociación?', 'value': ficha.perteneceAsociacion == true ? 'Sí' : 'No'},
+              {'label': 'Nombre de la organización:', 'value': ficha.nombreOrganizacion ?? 'No especificado'},
+              {'label': 'Frecuencia con que acude:', 'value': ficha.frecuenciaAcudeAsociacion ?? 'No especificado'},
+              {'label': 'Actividad en la asociación:', 'value': ficha.actividadAsociacion ?? 'No especificado'},
+            ],
+            font: font,
+            fontBold: fontBold,
+          ),
+          pw.SizedBox(height: 15),
+          _buildPdfSection(
+            title: 'Situación Económica',
+            items: [
+              {'label': '¿Recibe pensión?', 'value': ficha.recibePension == true ? 'Sí' : 'No'},
+              {'label': 'Tipo de pensión:', 'value': ficha.tipoPension ?? 'No especificado'},
+              {'label': '¿Tiene otros ingresos?', 'value': ficha.tieneOtrosIngresos == true ? 'Sí' : 'No'},
+              {'label': 'Monto de otros ingresos:', 'value': ficha.montoOtrosIngresos?.toString() ?? 'No especificado'},
+              {'label': 'Fuente de ingresos:', 'value': ficha.fuenteIngresos ?? 'No especificado'},
+              {'label': '¿Quién cobra los ingresos?', 'value': ficha.quienCobraIngresos ?? 'No especificado'},
+              {'label': '¿A dónde van los recursos?', 'value': ficha.destinoRecursos ?? 'No especificado'},
+            ],
+            font: font,
+            fontBold: fontBold,
+          ),
+          pw.SizedBox(height: 15),
+          _buildPdfSection(
+            title: 'Vivienda',
+            items: [
+              {'label': 'Tipo de vivienda:', 'value': ficha.tipoVivienda ?? 'No especificado'},
+              {'label': 'Acceso a la vivienda:', 'value': ficha.accesoVivienda ?? 'No especificado'},
+            ],
+            font: font,
+            fontBold: fontBold,
+          ),
+          pw.SizedBox(height: 15),
+          _buildPdfSection(
+            title: 'Nutrición',
+            items: [
+              {'label': '¿Se alimenta bien?', 'value': ficha.seAlimentaBien == true ? 'Sí' : 'No'},
+              {'label': 'Número de comidas diarias:', 'value': ficha.numeroComidasDiarias?.toString() ?? 'No especificado'},
+              {'label': 'Especificar comidas:', 'value': ficha.especificarComidas ?? 'No especificado'},
+            ],
+            font: font,
+            fontBold: fontBold,
+          ),
+          pw.SizedBox(height: 15),
+          _buildPdfSection(
+            title: 'Salud',
+            items: [
+              {'label': 'Estado de salud:', 'value': ficha.estadoSalud ?? 'No especificado'},
+              {'label': '¿Enfermedad catastrófica?', 'value': ficha.enfermedadCatastrofica == true ? 'Sí' : 'No'},
+              {'label': 'Especificar enfermedad:', 'value': ficha.especificarEnfermedad ?? 'No especificado'},
+              {'label': '¿Discapacidad?', 'value': ficha.discapacidad == true ? 'Sí' : 'No'},
+              {'label': '¿Toma medicación constante?', 'value': ficha.tomaMedicamentoConstante == true ? 'Sí' : 'No'},
+              {'label': 'Especificar medicamento:', 'value': ficha.especificarMedicamento ?? 'No especificado'},
+              {'label': '¿Utiliza ayuda técnica?', 'value': ficha.utilizaAyudaTecnica == true ? 'Sí' : 'No'},
+              {'label': 'Especificar ayuda técnica:', 'value': ficha.especificarAyudaTecnica ?? 'No especificado'},
+            ],
+            font: font,
+            fontBold: fontBold,
+          ),
+          pw.SizedBox(height: 15),
+          _buildPdfSection(
+            title: 'Servicios que desea ingresar',
+            items: [
+              {'label': '¿Desea servicio residencial?', 'value': ficha.deseaServicioResidencial == true ? 'Sí' : 'No'},
+              {'label': '¿Desea servicio diurno?', 'value': ficha.deseaServicioDiurno == true ? 'Sí' : 'No'},
+              {'label': '¿Desea espacios de socialización?', 'value': ficha.deseaEspaciosSocializacion == true ? 'Sí' : 'No'},
+              {'label': '¿Desea atención domiciliaria?', 'value': ficha.deseaAtencionDomiciliaria == true ? 'Sí' : 'No'},
+            ],
+            font: font,
+            fontBold: fontBold,
+          ),
+        ],
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+      name: 'Ficha_Social_${paciente.cedula}.pdf',
+    );
+  }
+
+  pw.Widget _buildPdfSection({
+    required String title,
+    required List<Map<String, String>> items,
+    required pw.Font font,
+    required pw.Font fontBold,
+  }) {
+    return pw.Container(
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(width: 1, color: PdfColors.grey300),
+        borderRadius: pw.BorderRadius.circular(5),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.deepPurple50,
+              borderRadius: pw.BorderRadius.only(
+                topLeft: pw.Radius.circular(4),
+                topRight: pw.Radius.circular(4),
+              ),
+            ),
+            child: pw.Text(
+              title,
+              style: pw.TextStyle(font: fontBold, fontSize: 14, color: PdfColors.deepPurple),
+            ),
+          ),
+          pw.Divider(color: PdfColors.deepPurple, thickness: 0.5),
+          pw.Padding(
+            padding: const pw.EdgeInsets.all(10),
+            child: pw.Column(
+              children: items.map((item) {
+                return pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      item['label']!,
+                      style: pw.TextStyle(font: fontBold, fontSize: 12, color: PdfColors.grey800),
+                    ),
+                    pw.SizedBox(height: 2),
+                    pw.Container(
+                      width: double.infinity,
+                      padding: const pw.EdgeInsets.all(6),
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.grey50,
+                        borderRadius: pw.BorderRadius.circular(2),
+                        border: pw.Border.all(color: PdfColors.grey300),
+                      ),
+                      child: pw.Text(
+                        item['value']!.isEmpty ? 'No especificado' : item['value']!,
+                        style: pw.TextStyle(font: font, fontSize: 11),
+                      ),
+                    ),
+                    pw.SizedBox(height: 6),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,6 +254,26 @@ class _FichaSocialScreenState extends State<FichaSocialScreen> {
         title: const Text('Ficha Social del Paciente'),
         backgroundColor: Colors.deepPurple,
         elevation: 0,
+        actions: [
+          // Botón de imprimir en la barra de acciones
+          IconButton(
+            icon: const Icon(Icons.print),
+            onPressed: () async {
+              final pacienteData = await paciente;
+              final fichaSocialData = await fichaSocial;
+              if (pacienteData != null && fichaSocialData != null) {
+                await _imprimirFichaSocial(pacienteData, fichaSocialData);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('No hay datos disponibles para imprimir'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: _checkingData
           ? Center(child: CircularProgressIndicator(color: Colors.deepPurple))
@@ -153,6 +372,21 @@ class _FichaSocialScreenState extends State<FichaSocialScreen> {
                         ],
                       ),
                       const SizedBox(height: 30),
+                      // Botón flotante para imprimir
+                      Center(
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.print),
+                          label: const Text('Imprimir Ficha Social'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          ),
+                          onPressed: () async {
+                            await _imprimirFichaSocial(paciente, ficha);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 );

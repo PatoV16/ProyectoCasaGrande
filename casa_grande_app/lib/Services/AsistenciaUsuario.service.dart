@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 
 class AsistenciaUsuarioService {
   final CollectionReference asistenciaRef =
-      FirebaseFirestore.instance.collection('asistencia');
+      FirebaseFirestore.instance.collection('asistenciaUsuario');
 
   Future<void> registrarAsistencia(AsistenciaUsuario asistencia) async {
     try {
