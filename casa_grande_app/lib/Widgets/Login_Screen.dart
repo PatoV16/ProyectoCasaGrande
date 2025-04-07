@@ -96,6 +96,12 @@ class _LoginScreenState extends State<LoginScreen> {
               arguments: userModel,
             );
             break;
+          case 'Enfermera':
+            Navigator.of(context).pushReplacementNamed(
+              '/EnfermeraDashboard',
+              arguments: userModel,
+            );
+            break;  
           default:
             Navigator.of(context).pushReplacementNamed('/home');
             break;
@@ -163,35 +169,40 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 // Logo y título
                 Center(
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 248, 248, 248).withOpacity(0.9),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color.fromARGB(255, 247, 247, 247).withOpacity(0.3),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Image.asset(
-                      'assets/logo.png',  // Asegúrate de que la imagen esté en la carpeta assets y declarada en pubspec.yaml
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,  // Ajusta la imagen dentro del espacio asignado
+  child: Container(
+    width: 120,
+    height: 120,
+    decoration: BoxDecoration(
+      color: const Color.fromARGB(255, 248, 248, 248).withOpacity(0.9),
+      shape: BoxShape.circle,
+      boxShadow: [
+        BoxShadow(
+          color: const Color.fromARGB(255, 200, 200, 200).withOpacity(0.3),
+          blurRadius: 15,
+          offset: const Offset(0, 5),
+        ),
+      ],
+    ),
+    child: ClipOval(
+      child: Padding(
+        padding: const EdgeInsets.all(10.0), // Espaciado interno para que no se corte
+        child: Image.asset(
+          'assets/logo.png',
+          fit: BoxFit.contain, // O puedes probar con BoxFit.cover si quieres que llene
+        ),
+      ),
+    ),
+  ),
 ),
-                  ),
-                ),
+
                 
                 const SizedBox(height: 30),
                 
                 const Text(
-                  'Centro Gerontológico',
+                  'Centro Gerontológico Casa Grande',
                   textAlign: TextAlign.center,
                   style: TextStyle(
+                    decoration: TextDecoration.none,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: textColor,
@@ -205,6 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Cuidados con calidez y experiencia',
                   textAlign: TextAlign.center,
                   style: TextStyle(
+                    decoration: TextDecoration.none,
                     fontSize: 16,
                     color: Color(0xFF6D7A8D),
                     letterSpacing: 0.2,
@@ -234,6 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const Text(
                             'Iniciar sesión',
                             style: TextStyle(
+                              decoration: TextDecoration.none,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: textColor,
@@ -246,6 +259,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const Text(
                             'Correo electrónico',
                             style: TextStyle(
+                              decoration: TextDecoration.none,
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
                               color: Color(0xFF515C6F),
@@ -283,6 +297,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const Text(
                             'Contraseña',
                             style: TextStyle(
+                              decoration: TextDecoration.none,
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
                               color: Color(0xFF515C6F),
@@ -365,6 +380,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   : const Text(
                                       'Iniciar sesión',
                                       style: TextStyle(
+                                        decoration: TextDecoration.none,
                                         fontSize: 17,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -386,6 +402,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Text(
                       '¿No tiene una cuenta?',
                       style: TextStyle(
+                        decoration: TextDecoration.none,
                         fontSize: 15,
                         color: Color(0xFF6D7A8D),
                       ),
@@ -395,6 +412,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text(
                         'Registrarse',
                         style: TextStyle(
+                          decoration: TextDecoration.none,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: accentColor,

@@ -7,8 +7,19 @@
 
     // Guardar una referencia en Firestore
     Future<void> addReferencia(Referencia referencia) async {
-    print('Datos a guardar: ${referencia.toJson()}');
-    await referenciaRef.add(referencia.toJson());
+    try {
+      // Crear un nuevo documento con ID automático
+      final docRef = referenciaRef.doc();
+      
+      // Asignar el ID del documento al modelo
+      referencia.id = docRef.id;
+      
+      // Guardar el documento con todos los campos incluyendo el ID
+      await docRef.set(referencia.toJson());
+    } catch (e) {
+      print('Error al guardar referencia: $e');
+      throw e;
+    }
   }
 
     // Obtener todas las referencias en tiempo real
@@ -42,15 +53,27 @@
     Future<void> deleteReferencia(String id) async {
       await referenciaRef.doc(id).delete();
     }
-     Future<Referencia?> getReferenciaByPacienteCedula(String cedula) async {
+    Future<Referencia?> getReferenciaByPacienteCedula(String cedula) async {
     QuerySnapshot querySnapshot = await referenciaRef
-        .where('id_paciente.cedula', isEqualTo: cedula)
+        .where('id_paciente', isEqualTo: cedula)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
       var doc = querySnapshot.docs.first;
       return Referencia.fromJson(doc.data() as Map<String, dynamic>);
     }
-    return null; // Si no encuentra una referencia
+    return null;
+  }
+    Future<List<Referencia>> getReferenciasByPacienteId(String idPaciente) async {
+    QuerySnapshot querySnapshot = await referenciaRef
+        .where('id_paciente.cedula', isEqualTo: idPaciente)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      return querySnapshot.docs.map((doc) {
+        return Referencia.fromJson(doc.data() as Map<String, dynamic>);
+      }).toList();
+    }
+    return []; // Retorna una lista vacía si no hay referencias
   }
   }

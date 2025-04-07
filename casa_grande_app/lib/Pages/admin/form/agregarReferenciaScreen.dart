@@ -86,6 +86,7 @@ class _AgregarReferenciaScreenState extends State<AgregarReferenciaScreen> {
   }
 
   Referencia nuevaReferencia = Referencia(
+    id: '',
     idPaciente: _pacienteSeleccionado!,
     zona: _zonaController.text,
     distrito: _distritoController.text,

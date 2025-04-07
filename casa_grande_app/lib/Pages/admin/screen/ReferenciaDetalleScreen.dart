@@ -9,8 +9,8 @@ import 'package:flutter/material.dart' show Icons;
 
 class ReferenciaDetalleScreen extends StatefulWidget {
   final String idPaciente;
-
-  ReferenciaDetalleScreen({required this.idPaciente});
+  final String id;
+  ReferenciaDetalleScreen({required this.idPaciente, required this.id});
 
   @override
   _ReferenciaDetalleScreenState createState() =>
@@ -23,7 +23,7 @@ class _ReferenciaDetalleScreenState extends State<ReferenciaDetalleScreen> {
   @override
   void initState() {
     super.initState();
-    referencia = ReferenciaService().getReferenciaByPacienteCedula(widget.idPaciente);
+    referencia = ReferenciaService().getReferenciaById(widget.id);
   }
 
   @override

@@ -1,7 +1,7 @@
 import 'Paciente.model.dart';
 
 class Referencia {
-  int? id;
+  String id;
   Paciente idPaciente;
   String zona;
   String distrito;
@@ -25,7 +25,7 @@ class Referencia {
   DateTime fecha;
 
   Referencia({
-    this.id,
+    required this.id,
     required this.idPaciente,
     required this.zona,
     required this.distrito,

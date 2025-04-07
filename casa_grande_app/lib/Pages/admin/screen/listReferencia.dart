@@ -1,8 +1,10 @@
-import 'package:casa_grande_app/Pages/admin/form/agregarReferenciaScreen.dart';
+import 'package:casa_grande_app/Models/Paciente.model.dart';
+import 'package:casa_grande_app/Services/Paciente.service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:casa_grande_app/Models/Referencia.model.dart';
 import 'package:casa_grande_app/Services/Referencia.service.dart';
+import 'package:casa_grande_app/Pages/admin/screen/listaReferenciaUsuarios.dart';
 
 class ReferenciaListScreen extends StatefulWidget {
   const ReferenciaListScreen({Key? key}) : super(key: key);
@@ -12,84 +14,71 @@ class ReferenciaListScreen extends StatefulWidget {
 }
 
 class _ReferenciaListScreenState extends State<ReferenciaListScreen> {
-  final ReferenciaService referenciaService = ReferenciaService();
+  final PacienteService _pacienteService = PacienteService();
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Lista de Referencias'),
+        middle: const Text('Lista de Pacientes'),
         leading: CupertinoNavigationBarBackButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       child: SafeArea(
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: StreamBuilder<List<Referencia>>(
-  stream: referenciaService.getReferencias(),
-  builder: (context, snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(child: CupertinoActivityIndicator());
-    } else if (snapshot.hasError) {
-      return Center(child: Text('Error: ${snapshot.error}'));
-    } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
-      return const Center(child: Text('No hay referencias registradas'));
-    } else {
-      final referencias = snapshot.data!;
-      return ListView.builder(
-        itemCount: referencias.length,
-        itemBuilder: (context, index) {
-          final referencia = referencias[index];
-          return Material(
-            child: ListTile(
-              title: Text('Paciente: ${referencia.idPaciente.nombre } ${referencia.idPaciente.apellido }'),
-              subtitle: Text('Institución: ${referencia.nombreInstitucion}'),
-              onTap: () {
-                            Navigator.pushNamed(
-                context,
-                '/detalleRefeencia',
-                arguments: referencia.idPaciente.cedula, // Pasar el idPaciente
-              );  
-                            },
-            ),
-          );
-        },
-      );
-    }
-  },
-),
-
-            ),
-            // Botón flotante personalizado
-            Positioned(
-              bottom: 20, // Distancia desde la parte inferior
-              right: 20, // Distancia desde la derecha
-              child: CupertinoButton(
-                padding: const EdgeInsets.all(16.0),
-                color: CupertinoColors.activeBlue, // Color del botón
-                borderRadius: BorderRadius.circular(30), // Bordes redondeados
-                onPressed: () {
-                  // Navegar a la pantalla de agregar referencia
-                  Navigator.push(
-                    context,
-                    CupertinoPageRoute(
-                      builder: (context) => const AgregarReferenciaScreen(),
-                    ),
-                  );
-                },
-                child: const Icon(
-                  CupertinoIcons.add, // Icono de "+"
-                  color: CupertinoColors.white, // Color del icono
-                  size: 28, // Tamaño del icono
-                ),
-              ),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: StreamBuilder<List<Paciente>>(
+            stream: _pacienteService.getPacientes(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CupertinoActivityIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text('No hay pacientes registrados'));
+              } else {
+                final pacientes = snapshot.data!;
+                return ListView.builder(
+                  itemCount: pacientes.length,
+                  itemBuilder: (context, index) {
+                    final paciente = pacientes[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          child: Text(paciente.nombre.substring(0, 1)),
+                        ),
+                        title: Text(
+                          '${paciente.nombre} ${paciente.apellido}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Cédula: ${paciente.cedula}'),
+                            Text('Teléfono: ${paciente.telefono}'),
+                          ],
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => FichaPacienteListScreen(
+                                idPaciente: paciente.cedula,
+                                id: paciente.id.toString(),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              }
+            },
+          ),
         ),
       ),
     );

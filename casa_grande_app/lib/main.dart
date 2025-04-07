@@ -16,6 +16,10 @@ import 'package:casa_grande_app/Pages/admin/screen/listReferencia.dart';
 import 'package:casa_grande_app/Pages/admin/screen/listaActas.dart';
 import 'package:casa_grande_app/Pages/admin/form/paciente_form.dart';
 import 'package:casa_grande_app/Pages/admin/screen/verActaCompromiso.dart';
+import 'package:casa_grande_app/Pages/enfermera/form/kardex.form.dart';
+import 'package:casa_grande_app/Pages/enfermera/screen/enfermeraDashboard.dart';
+import 'package:casa_grande_app/Pages/enfermera/screen/listaControlMedicacion.dart';
+import 'package:casa_grande_app/Pages/enfermera/screen/listaFichasControlMedicacion.dart';
 import 'package:casa_grande_app/Pages/medico/Form/fichaMedica.form.dart';
 import 'package:casa_grande_app/Pages/medico/Screen/ListaPacientes.dart';
 import 'package:casa_grande_app/Pages/medico/Screen/fichaMedicaScreen.dart';
@@ -102,10 +106,10 @@ class MyApp extends StatelessWidget {
                                       final args = ModalRoute.of(context)!.settings.arguments as String;
                                       return EditarEmpleadoScreen(idEmpleado: args);
                                     },
-          '/detalleRefeencia': (context){
-                                      final args = ModalRoute.of(context)!.settings.arguments as String;
-                                      return ReferenciaDetalleScreen(idPaciente: args);
-                                    },
+         //'/detalleRefeencia': (context){
+                               //       final args = ModalRoute.of(context)!.settings.arguments as String;
+                               //       return ReferenciaDetalleScreen(idPaciente: args);
+                               //     },
           //*****/Médico/******** */
           '/Evolucion': (context) => EvolucionScreen(),
           '/MedicDashboard': (context){
@@ -338,6 +342,24 @@ class MyApp extends StatelessWidget {
         },
       );
         },
+
+        ///Enfermera
+        ///
+        '/EnfermeraDashboard': (context){
+                                      final args = ModalRoute.of(context)!.settings.arguments as UserModel;
+                                      return NurseDashboard(user: args);
+
+          
+          },
+        '/ListaControlMedicacion': (context) => ListaControlMedicacion(),
+        '/FichasMedicacion': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as String;
+            return ListaFichasKardex (idPaciente: args);
+          },
+          '/NuevaFichaKardex': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as String;
+            return KardexGerontologicoForm (idPaciente: args);
+          },
         }
       ),
     );
