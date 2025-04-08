@@ -1,6 +1,7 @@
 import 'package:casa_grande_app/Models/AsistenciaUsuario.model.dart';
 import 'package:casa_grande_app/Models/Barthel.model.dart';
 import 'package:casa_grande_app/Models/Empleado.model.dart';
+import 'package:casa_grande_app/Models/Kardex.model.dart';
 import 'package:casa_grande_app/Models/Paciente.model.dart';
 import 'package:casa_grande_app/Models/UserModel.dart';
 import 'package:casa_grande_app/Pages/admin/form/avisosForm.dart';
@@ -17,6 +18,7 @@ import 'package:casa_grande_app/Pages/admin/screen/listaActas.dart';
 import 'package:casa_grande_app/Pages/admin/form/paciente_form.dart';
 import 'package:casa_grande_app/Pages/admin/screen/verActaCompromiso.dart';
 import 'package:casa_grande_app/Pages/enfermera/form/kardex.form.dart';
+import 'package:casa_grande_app/Pages/enfermera/screen/DetalleFichaKardex.dart';
 import 'package:casa_grande_app/Pages/enfermera/screen/enfermeraDashboard.dart';
 import 'package:casa_grande_app/Pages/enfermera/screen/listaControlMedicacion.dart';
 import 'package:casa_grande_app/Pages/enfermera/screen/listaFichasControlMedicacion.dart';
@@ -360,6 +362,8 @@ class MyApp extends StatelessWidget {
             final args = ModalRoute.of(context)!.settings.arguments as String;
             return KardexGerontologicoForm (idPaciente: args);
           },
+          '/DetalleFichaKardex': (context) => DetalleFichaKardex(),
+
         }
       ),
     );
