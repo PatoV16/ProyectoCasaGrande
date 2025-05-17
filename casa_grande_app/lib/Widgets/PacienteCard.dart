@@ -1,3 +1,4 @@
+import 'package:casa_grande_app/Pages/medico/Screen/ListaFichasPacienteScreen.dart';
 import 'package:casa_grande_app/Services/Auth.Service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -54,34 +55,23 @@ class PacienteCard extends StatelessWidget {
               color: CupertinoColors.activeBlue,
               borderRadius: BorderRadius.circular(30),
               onPressed: () async {
-                try {
-                  String idEmpleado = await authService.obtenerUIDUsuario(); // Obtener el UID del empleado
-                  // Verifica si el paciente tiene una ficha médica
-                  FichaMedica? ficha = await fichaMedicaService.getFichaMedicaByPacienteCedula(paciente.cedula);
+              try {
+                String idEmpleado = await authService.obtenerUIDUsuario(); // Obtener el UID del empleado
+                // Verifica si el paciente tiene una ficha médica
+                FichaMedica? ficha = await fichaMedicaService.getFichaMedicaByPacienteCedula(paciente.cedula);
 
-                  if (ficha != null) {
-                    // Si tiene ficha médica, navegar a la vista de ver detalles
-                    Navigator.pushNamed(
-                      context,
-                      '/verFichaMedica',
-                      arguments: {
-                        'idPaciente': paciente.cedula,
-                      },
-                    );
-                  } else {
-                    // Si no tiene ficha médica, navegar a la vista para agregar ficha
-                    Navigator.pushNamed(
-                      context,
-                      '/agregarFichaMedica',
-                      arguments: {
-                        'idPaciente': paciente.cedula,
-                        'idEmpleado': idEmpleado,
-                      },
-                    );
-                  }
-                } catch (e) {
-                  print("Error obteniendo el UID del usuario o ficha médica: $e");
+                if (ficha != null) {
+                  // Si tiene ficha médica, navegar a la vista de ver detalles
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => ListaFichasPacienteScreen(cedulaPaciente: paciente.cedula),
+                    ),
+                  );
                 }
+              } catch (e) {
+                print("Error obteniendo el UID del usuario o ficha médica: $e");
+              }
               },
               child: const Text(
                 'Ver Detalles o Agregar Ficha',

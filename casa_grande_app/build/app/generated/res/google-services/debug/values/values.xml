@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">1067958530696</string>
+    <string name="google_api_key" translatable="false">AIzaSyBZnB8EVPNjMyY7wD3xt5N3R-IFuzw2x5I</string>
+    <string name="google_app_id" translatable="false">1:1067958530696:android:e6e2b37bee525e2686a53d</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBZnB8EVPNjMyY7wD3xt5N3R-IFuzw2x5I</string>
+    <string name="google_storage_bucket" translatable="false">bighouse-db.firebasestorage.app</string>
+    <string name="project_id" translatable="false">bighouse-db</string>
+</resources>

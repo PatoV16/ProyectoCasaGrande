@@ -76,11 +76,7 @@ class PsicologoDashboard extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    ActionButton(
-                      label: 'Lista de\nPacientes',
-                      icon: CupertinoIcons.person_2,
-                      onPressed: () => Navigator.pushNamed(context, '/PacientePsicologoLista'),
-                    ),
+                   
                      ActionButton(
                       label: 'Registrar\nAsistencia',
                       icon: CupertinoIcons.checkmark_circle,

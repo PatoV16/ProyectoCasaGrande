@@ -1,9 +1,9 @@
 import 'package:casa_grande_app/Models/Paciente.model.dart';
+import 'package:casa_grande_app/Pages/admin/form/agregarReferenciaScreen.dart';
 import 'package:casa_grande_app/Services/Paciente.service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:casa_grande_app/Models/Referencia.model.dart';
-import 'package:casa_grande_app/Services/Referencia.service.dart';
 import 'package:casa_grande_app/Pages/admin/screen/listaReferenciaUsuarios.dart';
 
 class ReferenciaListScreen extends StatefulWidget {
@@ -23,6 +23,19 @@ class _ReferenciaListScreenState extends State<ReferenciaListScreen> {
         middle: const Text('Lista de Pacientes'),
         leading: CupertinoNavigationBarBackButton(
           onPressed: () => Navigator.pop(context),
+        ),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Icon(CupertinoIcons.add, size: 28),
+          onPressed: () {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (context) => AgregarReferenciaScreen(),
+              ),
+            );
+            print('Agregar nueva ficha');
+          },
         ),
       ),
       child: SafeArea(

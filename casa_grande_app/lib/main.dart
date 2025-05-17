@@ -18,6 +18,7 @@ import 'package:casa_grande_app/Pages/admin/screen/listaActas.dart';
 import 'package:casa_grande_app/Pages/admin/form/paciente_form.dart';
 import 'package:casa_grande_app/Pages/admin/screen/verActaCompromiso.dart';
 import 'package:casa_grande_app/Pages/enfermera/form/kardex.form.dart';
+import 'package:casa_grande_app/Pages/enfermera/form/signos.form.dart';
 import 'package:casa_grande_app/Pages/enfermera/screen/DetalleFichaKardex.dart';
 import 'package:casa_grande_app/Pages/enfermera/screen/enfermeraDashboard.dart';
 import 'package:casa_grande_app/Pages/enfermera/screen/listaControlMedicacion.dart';
@@ -347,6 +348,10 @@ class MyApp extends StatelessWidget {
 
         ///Enfermera
         ///
+        /*'/signos': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Paciente;
+          return SignosVitalesScreen(paciente: args);
+        }, */
         '/EnfermeraDashboard': (context){
                                       final args = ModalRoute.of(context)!.settings.arguments as UserModel;
                                       return NurseDashboard(user: args);

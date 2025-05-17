@@ -1,15 +1,15 @@
 import 'package:casa_grande_app/Models/UserModel.dart';
+import 'package:casa_grande_app/Pages/enfermera/screen/signos_list.page.dart';
 import 'package:casa_grande_app/Services/Auth.Service.dart';
 import 'package:casa_grande_app/Widgets/AvisosListWidget.dart';
 import 'package:casa_grande_app/Widgets/avisosUser.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show CircleAvatar;
-
+import 'package:flutter/material.dart' show CircleAvatar, MaterialPageRoute;
 import '../../../Widgets/action_button.dart';
 
 class NurseDashboard extends StatelessWidget {
   final UserModel user;
-  final authService = AuthService();
+  final AuthService authService = AuthService();
 
   NurseDashboard({Key? key, required this.user}) : super(key: key);
 
@@ -25,7 +25,7 @@ class NurseDashboard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Encabezado con información del usuario
+              // User Information Header
               Row(
                 children: [
                   const CircleAvatar(
@@ -43,7 +43,7 @@ class NurseDashboard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Bienvenida, ${user.nombre}',
+                          'Welcome, ${user.nombre}',
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -51,7 +51,7 @@ class NurseDashboard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'Cargo: ${user.cargo}',
+                          'Role: ${user.cargo}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: CupertinoColors.systemGrey,
@@ -64,9 +64,9 @@ class NurseDashboard extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Acciones Rápidas para Enfermería
+              // Quick Actions for Nursing
               const Text(
-                'Acciones Rápidas',
+                'Quick Actions',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -77,21 +77,38 @@ class NurseDashboard extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    
                     ActionButton(
-                      label: 'Registrar\nSignos',
+                      label: 'Register\nAttendance',
+                      icon: CupertinoIcons.checkmark_circle,
+                      onPressed: () => Navigator.pushNamed(
+                          context, '/RegistrarAsistenciaUsuario',
+                          arguments: user),
+                    ),
+                    ActionButton(
+                      label: 'Register\nPatient Attendance',
+                      icon: CupertinoIcons.checkmark_circle,
+                      onPressed: () => Navigator.pushNamed(
+                          context, '/registrarAsistenciaPaciente'),
+                    ),
+                    ActionButton(
+                      label: 'Register\nSigns',
                       icon: CupertinoIcons.heart,
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/RegistrarSignos', arguments: user),
+                      onPressed: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => ListaPacientesScreen()),
+  );
+},
+
                     ),
                     ActionButton(
-                      label: 'Control de\nMedicación',
+                      label: 'Medication\nControl',
                       icon: CupertinoIcons.capsule,
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/ListaControlMedicacion'),
+                      onPressed: () => Navigator.pushNamed(
+                          context, '/ListaControlMedicacion'),
                     ),
                     ActionButton(
-                      label: 'Cerrar sesión',
+                      label: 'Logout',
                       icon: CupertinoIcons.power,
                       onPressed: () =>
                           authService.signOutAndNavigateToLogin(context),
@@ -101,16 +118,16 @@ class NurseDashboard extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Resumen de Avisos
+              // Activity Summary
               const Text(
-                'Resumen de Actividad',
+                'Activity Summary',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
-              AvisosListUserWidget(),
+               AvisosListUserWidget(),
             ],
           ),
         ),
